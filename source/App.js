@@ -14,7 +14,7 @@ enyo.kind({
 				{kind: "onyx.Toolbar", components:[
 					{content: "Memos"},
 					{kind: "onyx.InputDecorator", style: "float: right", components:[
-						{kind: "onyx.Input", disabled: true},
+						{name: "SearchInput", kind: "onyx.Input", oninput: "searchMemos"},
 						{kind: "Image", src: "assets/search-input-search.png", style: "width: 20px; height: 20px;"}
 					]}
 				]},
@@ -49,12 +49,12 @@ enyo.kind({
 			kind: "Panels",
 			arrangerKind: "CardArranger",
 			draggable: false,
+			onTransitionFinish: "gcPanels",
 			components:[
 				{kind: "EmptyPanel"}
 			]}
 	],
 	rendered: function(inSender) {
-		//localStorage.clear();
 		this.inherited(arguments);
 		this.loadMemos();
 	},
@@ -77,6 +77,7 @@ enyo.kind({
 		localStorage.webOSMemos = JSON.stringify(storageObject);
 	},
 	loadMemos: function() {
+		//Erase existing panel data
 		var c = this.$.ContentPanels.getPanels();
 		
 		for(var panel in c) {
@@ -86,10 +87,9 @@ enyo.kind({
 		
 		this.$.MenuRepeater.setCount(0);
 		
+		//If localStorage exists, loop through and populate 
 		if(localStorage.webOSMemos) {
 			storageObject = JSON.parse(localStorage.webOSMemos);
-			enyo.log(storageObject);
-			enyo.log(this.$.ContentPanels.getPanels());
 		
 			var idx = 0;
 			for(var key in storageObject) {
@@ -97,11 +97,12 @@ enyo.kind({
 				p.$.TitleInput.setValue(storageObject[key].title);
 				p.$.ContentScroller.addStyles("background-color: " + storageObject[key].colour + "!important;");
 				p.$.MemoText.setValue(storageObject[key].text);
+				p.render();
 				idx++;
 			}
 			
-			this.$.MenuRepeater.setCount(idx);
 			this.$.ContentPanels.reflow();
+			this.$.MenuRepeater.setCount(idx);
 		}
 		
 		if(this.$.MenuRepeater.count == 0) {
@@ -115,7 +116,7 @@ enyo.kind({
 	},
 	createPanel: function(inSender) {
 		var c = this.$.ContentPanels;
-		var p = c.createComponent(
+		return c.createComponent(
 			{kind: "ContentPanel",
 			onTitleChanged: "panelTitleChanged",
 			onColourChanged: "panelColourChanged",
@@ -123,13 +124,12 @@ enyo.kind({
 			onDeleteTapped: "deleteMemo"},
 			{owner: this}
 		);
-		p.render();
-		
-		return p;
 	},
 	setupMenuItem: function(inSender, inEvent) {
 		var c = this.$.ContentPanels.getPanels();
-		if(c[inEvent.index + 1]) {
+		var s = this.$.SearchInput;
+		enyo.log(s.getValue());
+		if(c[inEvent.index + 1] && (s.getValue() == '' || s.getValue != '' && c[inEvent.index + 1].getSearchMatch())) {
 			var t = c[inEvent.index + 1].$.TitleInput.getValue();
 			inEvent.item.controls[0].controls[0].setContent(t);
 			var bg = c[inEvent.index + 1].$.ContentScroller.hasNode().style.backgroundColor;
@@ -141,34 +141,49 @@ enyo.kind({
 		var count = 0;
 		for(idx in storageObject)
 			count++;
-		this.createPanel();
-		this.$.ContentPanels.next();
+			
+		p = this.createPanel();
+		p.render();
+		this.$.ContentPanels.reflow();
+		
+		var cp = this.$.ContentPanels;
+		cp.setIndex(cp.getPanels().length);
 		
 		storageObject[count++] = {title: "", colour: "", text: ""};
-		localStorage.webOSMemos = JSON.stringify(storageObject);
 		this.$.MenuRepeater.setCount(count);
+		this.saveMemos();
 		
 		this.draggable = true;
 	},
 	deleteMemo: function(inSender) {
 		delete storageObject[this.$.ContentPanels.getActive().index];
-		this.$.ContentPanels.getActive().destroy();
-		this.$.ContentPanels.next();
-		this.$.MenuRepeater.setCount(this.$.ContentPanels.getPanels().length - 1);
+		this.$.ContentPanels.getActive().gc = true;
+		if(this.$.ContentPanels.getPanels().length > 2)
+			this.$.ContentPanels.next();
+		else
+			this.$.ContentPanels.previous();
+	},
+	gcPanels: function(inSender, inEvent) {
+		var p = this.$.ContentPanels.getPanels()[inEvent.fromIndex];
+		if(p && p.kind == "ContentPanel" && p.getGc()) {
+			p.destroy();
+			
+			this.$.MenuRepeater.setCount(this.$.ContentPanels.getPanels().length - 1);
 		
-		this.saveMemos();
+			this.saveMemos();
 		
-		if(this.$.MenuRepeater.count == 0) {
-			this.draggable = false;
-			this.setIndex(0);
+			if(this.$.MenuRepeater.count == 0) {
+				this.draggable = false;
+				this.setIndex(0);
+			}
 		}
 	},
 	panelTitleChanged: function(inSender, inEvent) {
-		this.$.MenuRepeater.build();
+		this.$.MenuRepeater.renderRow(inEvent.index - 1);
 		this.saveMemos();
 	},
 	panelColourChanged: function(inSender, inEvent) {
-		this.$.MenuRepeater.build();
+		this.$.MenuRepeater.renderRow(inEvent.index - 1);
 		this.saveMemos();
 	},
 	memoChanged: function(inSender, inEvent) {
@@ -176,6 +191,26 @@ enyo.kind({
 	},
 	menuItemTapped: function(inSender, inEvent) {
 		this.$.ContentPanels.setIndex(inEvent.index + 1);
+	},
+	searchMemos: function(inSender, inEvent) {
+		var r = this.$.MenuRepeater;
+		var p = this.$.ContentPanels.getPanels();
+		var m = 0;
+		for(var item in p) {
+			enyo.log(p[item].kind);
+			if(p[item].kind == "ContentPanel") {
+				if(p[item].$.TitleInput.getValue().match(inSender.getValue())) {
+					p[item].setSearchMatch(true);
+					m++;
+				}
+				else {
+					p[item].setSearchMatch(false);
+					r.renderRow(item);
+				}
+			}
+		}
+		enyo.log(m);
+		r.setCount(m);
 	}
 });
 
@@ -195,6 +230,10 @@ enyo.kind({
 		onColourChanged: "",
 		onMemoChanged: "",
 		onDeleteTapped: ""
+	},
+	published: {
+		gc: false,
+		searchMatch: false
 	},
 	components:[
 		{name: "Topbar", kind: "onyx.Toolbar", components:[
