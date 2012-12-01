@@ -149,6 +149,9 @@ enyo.kind({
 		var cp = this.$.ContentPanels;
 		cp.setIndex(cp.getPanels().length);
 		
+		if(enyo.Panels.isScreenNarrow())
+			this.setIndex(1);
+		
 		storageObject[count++] = {title: "", colour: "", text: ""};
 		this.$.MenuRepeater.setCount(count);
 		this.saveMemos();
@@ -158,10 +161,7 @@ enyo.kind({
 	deleteMemo: function(inSender) {
 		delete storageObject[this.$.ContentPanels.getActive().index];
 		this.$.ContentPanels.getActive().gc = true;
-		if(this.$.ContentPanels.getPanels().length > 2)
-			this.$.ContentPanels.next();
-		else
-			this.$.ContentPanels.previous();
+		this.$.ContentPanels.setIndex(0);
 	},
 	gcPanels: function(inSender, inEvent) {
 		var p = this.$.ContentPanels.getPanels()[inEvent.fromIndex];
@@ -172,10 +172,10 @@ enyo.kind({
 		
 			this.saveMemos();
 		
-			if(this.$.MenuRepeater.count == 0) {
+			if(this.$.MenuRepeater.count == 0)
 				this.draggable = false;
-				this.setIndex(0);
-			}
+				
+			this.setIndex(0);
 		}
 	},
 	panelTitleChanged: function(inSender, inEvent) {
@@ -191,6 +191,9 @@ enyo.kind({
 	},
 	menuItemTapped: function(inSender, inEvent) {
 		this.$.ContentPanels.setIndex(inEvent.index + 1);
+		
+		if(enyo.Panels.isScreenNarrow())
+			this.setIndex(1);
 	},
 	searchMemos: function(inSender, inEvent) {
 		var r = this.$.MenuRepeater;
