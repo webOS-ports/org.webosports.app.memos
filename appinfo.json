@@ -1,0 +1,9 @@
+{
+  "title": "Memos",
+  "icon": "icon.png",
+  "id": "org.webosports.app.memos",
+  "type": "web",
+  "removable": true,
+  "uiRevision": 2,
+  "main": "index.html",
+}
