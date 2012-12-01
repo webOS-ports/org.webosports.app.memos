@@ -1,4 +1,5 @@
 var storageObject = {};
+var searchResults = {};
 
 enyo.kind({
 	name: "App",
@@ -128,12 +129,13 @@ enyo.kind({
 	setupMenuItem: function(inSender, inEvent) {
 		var c = this.$.ContentPanels.getPanels();
 		var s = this.$.SearchInput;
-		enyo.log(s.getValue());
-		if(c[inEvent.index + 1] && (s.getValue() == '' || s.getValue != '' && c[inEvent.index + 1].getSearchMatch())) {
-			var t = c[inEvent.index + 1].$.TitleInput.getValue();
-			inEvent.item.controls[0].controls[0].setContent(t);
-			var bg = c[inEvent.index + 1].$.ContentScroller.hasNode().style.backgroundColor;
-			inEvent.item.controls[0].controls[1].addStyles("background-color: " + bg + "!important;");
+		if(c[inEvent.index + 1] && s.getValue() == '') {
+			inEvent.item.controls[0].controls[0].setContent(c[inEvent.index + 1].$.TitleInput.getValue());
+			inEvent.item.controls[0].controls[1].addStyles("background-color: " + c[inEvent.index + 1].$.ContentScroller.hasNode().style.backgroundColor + "!important;");
+		}
+		else if(searchResults[inEvent.index]) {
+			inEvent.item.controls[0].controls[0].setContent(searchResults[inEvent.index].title);
+			inEvent.item.controls[0].controls[1].addStyles("background-color: " + searchResults[inEvent.index].colour + "!important;");
 		}
 		return true;
 	},
@@ -190,30 +192,41 @@ enyo.kind({
 		this.saveMemos();
 	},
 	menuItemTapped: function(inSender, inEvent) {
-		this.$.ContentPanels.setIndex(inEvent.index + 1);
+		if(this.$.SearchInput.getValue() == '')
+			this.$.ContentPanels.setIndex(inEvent.index + 1);
+		else {
+			var c = this.$.ContentPanels.getPanels();
+			var idx = 0;
+			
+			for(var panel in c) {
+				if(c[panel].kind == "ContentPanel" && searchResults[inEvent.index].title == c[panel].$.TitleInput.getValue()) {
+					this.$.ContentPanels.setIndex(idx);
+					break;
+				}
+				idx++;
+			}
+			
+		}
 		
 		if(enyo.Panels.isScreenNarrow())
 			this.setIndex(1);
 	},
 	searchMemos: function(inSender, inEvent) {
+		searchResults = {};
+		
 		var r = this.$.MenuRepeater;
 		var p = this.$.ContentPanels.getPanels();
 		var m = 0;
 		for(var item in p) {
-			enyo.log(p[item].kind);
 			if(p[item].kind == "ContentPanel") {
 				if(p[item].$.TitleInput.getValue().match(inSender.getValue())) {
-					p[item].setSearchMatch(true);
+					searchResults[m] = {title: p[item].$.TitleInput.getValue(), colour: p[item].$.ContentScroller.hasNode().style.backgroundColor };
 					m++;
-				}
-				else {
-					p[item].setSearchMatch(false);
-					r.renderRow(item);
 				}
 			}
 		}
-		enyo.log(m);
 		r.setCount(m);
+		enyo.log(searchResults);
 	}
 });
 
