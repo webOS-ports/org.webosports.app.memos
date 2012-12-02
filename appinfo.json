@@ -1,5 +1,7 @@
 {
-  "title": "Memos",
+  "title": "Memos2",
+  "version": "0.0.1",
+  "vendor": "org.webosports",
   "icon": "icon.png",
   "id": "org.webosports.app.memos",
   "type": "web",
