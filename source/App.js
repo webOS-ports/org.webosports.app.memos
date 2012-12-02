@@ -9,56 +9,64 @@ enyo.kind({
 	arrangerKind: "CollapsingArranger",
 	draggable: false,
 	components:[
-			{name: "MenuPanel",
-			layoutKind: "FittableRowsLayout",
-			components:[
-				{kind: "onyx.Toolbar", components:[
-					{content: "Memos"},
-					{kind: "onyx.InputDecorator", style: "float: right", components:[
-						{name: "SearchInput", kind: "onyx.Input", oninput: "searchMemos"},
-						{kind: "Image", src: "assets/search-input-search.png", style: "width: 20px; height: 20px;"}
-					]}
-				]},
-				{kind: "Scroller",
-				horizontal: "hidden",
-				classes: "enyo-fill",
-				fit: true,
-				touch: true,
-				components:[
-					{name: "MenuRepeater",
-					kind: "Repeater",
-					count: 0,
-					onSetupItem: "setupMenuItem",
-					components:[
-						{classes: "list-item",
-						ontap: "menuItemTapped",
-						components:[
-							{name: "ItemTitle", style: "position: absolute; margin-top: 6px;"},
-							{kind: "onyx.Button",
-							classes: "colour-button",
-							style: "background-color: #F7EDB9; float: right;"},
-						]}
-					]}
-				]},
-				{kind: "onyx.Toolbar", components:[
-					{kind: "onyx.IconButton",
-					src: "assets/icon-new.png",
-					style: "float: right",
-					ontap: "newMemo"},
+		{kind: "Signals", onkeydown: "handleKeyDown", onkeyup: "handleKeyUp"},
+		{name: "MenuPanel",
+		layoutKind: "FittableRowsLayout",
+		components:[
+			{kind: "onyx.Toolbar", components:[
+				{content: "Memos"},
+				{kind: "onyx.InputDecorator", style: "float: right", components:[
+					{name: "SearchInput", kind: "onyx.Input", oninput: "searchMemos"},
+					{kind: "Image", src: "assets/search-input-search.png", style: "width: 20px; height: 20px;"}
 				]}
 			]},
-			{name: "ContentPanels",
-			kind: "Panels",
-			arrangerKind: "CardArranger",
-			draggable: false,
-			onTransitionFinish: "gcPanels",
+			{kind: "Scroller",
+			horizontal: "hidden",
+			classes: "enyo-fill",
+			fit: true,
+			touch: true,
 			components:[
-				{kind: "EmptyPanel"}
+				{name: "MenuRepeater",
+				kind: "Repeater",
+				count: 0,
+				onSetupItem: "setupMenuItem",
+				components:[
+					{classes: "list-item",
+					ontap: "menuItemTapped",
+					components:[
+						{name: "ItemTitle", style: "position: absolute; margin-top: 6px;"},
+						{kind: "onyx.Button",
+						classes: "colour-button",
+						style: "background-color: #F7EDB9; float: right;"},
+					]}
+				]}
+			]},
+			{kind: "onyx.Toolbar", components:[
+				{kind: "onyx.IconButton",
+				src: "assets/icon-new.png",
+				style: "float: right",
+				ontap: "newMemo"},
 			]}
+		]},
+		{name: "ContentPanels",
+		kind: "Panels",
+		arrangerKind: "CardArranger",
+		draggable: false,
+		onTransitionFinish: "gcPanels",
+		components:[
+			{kind: "EmptyPanel"}
+		]}
 	],
 	rendered: function(inSender) {
 		this.inherited(arguments);
 		this.loadMemos();
+	},
+	reflow: function(inSender) {
+		this.inherited(arguments);
+		if(enyo.Panels.isScreenNarrow())
+			this.setArrangerKind("PushPopArranger");
+		else
+			this.setArrangerKind("CollapsingArranger");
 	},
 	saveMemos: function() {
 		storageObject = {};
@@ -228,6 +236,11 @@ enyo.kind({
 		}
 		r.setCount(m);
 		enyo.log(searchResults);
+	},
+	handleKeyUp: function(inSender, inEvent) {
+		//Handle back gesture
+		if(inEvent.keyIdentifier == "U+1200001")
+			return this.setIndex(0);
 	}
 });
 
