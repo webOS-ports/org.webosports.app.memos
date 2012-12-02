@@ -23,6 +23,7 @@ enyo.kind({
 				horizontal: "hidden",
 				classes: "enyo-fill",
 				fit: true,
+				touch: true,
 				components:[
 					{name: "MenuRepeater",
 					kind: "Repeater",
@@ -268,12 +269,16 @@ enyo.kind({
 		horizontal: "hidden",
 		style: "background-color: #F7EDB9",
 		fit: true,
+		touch: true,
 		components:[
 			{name: "MemoText",
 			kind: "RichText",
-			content: "foo",
+			content: "",
 			style: "position: absolute; top: 0; bottom: 0; left: 0; right: 0; padding: 20px 32px;",
-			oninput: "memoChanged"},
+			handlers: {
+				ondragstart: "",
+				oninput: "memoChanged"
+			}},
 		]},
 		{kind: "onyx.Toolbar", components:[
 			{kind: "onyx.Grabber"},
