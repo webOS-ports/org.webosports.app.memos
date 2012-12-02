@@ -12,6 +12,7 @@ enyo.kind({
 		{kind: "Signals", onkeydown: "handleKeyDown", onkeyup: "handleKeyUp"},
 		{name: "MenuPanel",
 		layoutKind: "FittableRowsLayout",
+		style: "width: 33%",
 		components:[
 			{kind: "onyx.Toolbar", components:[
 				{content: "Memos"},
@@ -33,12 +34,25 @@ enyo.kind({
 				components:[
 					{classes: "list-item",
 					ontap: "menuItemTapped",
+					handlers: {
+						onmousedown: "pressed",
+						ondragstart: "released",
+						onmouseup: "released"
+					},
 					components:[
 						{name: "ItemTitle", style: "position: absolute; margin-top: 6px;"},
 						{kind: "onyx.Button",
 						classes: "colour-button",
 						style: "background-color: #F7EDB9; float: right;"},
-					]}
+					],
+					pressed: function() {
+						enyo.log("Press");
+						this.addClass("onyx-selected");
+					},
+					released: function() {
+						enyo.log("Release");
+						this.removeClass("onyx-selected");
+					}}
 				]}
 			]},
 			{kind: "onyx.Toolbar", components:[
