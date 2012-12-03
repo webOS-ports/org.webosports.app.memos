@@ -3,16 +3,15 @@
 	This way, you can minify your application, and just remove the "source" folder for production
 */
 #app {
-	background-color: #555;
+	background-color: #000000;
 }
 
 #app > * {
 	background-color: #555;
-	box-shadow: -4px 0px 4px rgba(0,0,0,0.3);
 }
 
 .onyx-toolbar {
-	height: 52px;
+	height: 64px;
 }
 
 .list-item {

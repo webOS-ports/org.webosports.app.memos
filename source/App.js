@@ -14,12 +14,19 @@ enyo.kind({
 		layoutKind: "FittableRowsLayout",
 		style: "width: 33%",
 		components:[
-			{kind: "onyx.Toolbar", components:[
-				{content: "Memos"},
-				{kind: "onyx.InputDecorator", style: "float: right", components:[
-					{name: "SearchInput", kind: "onyx.Input", oninput: "searchMemos"},
-					{kind: "Image", src: "assets/search-input-search.png", style: "width: 20px; height: 20px;"}
-				]}
+			{name: "MenuHeader",
+			kind: "PortsSearch",
+			title: "Memos",
+			onSearch: "searchMemos",
+			taglines:[
+				"Memo-tastic!",
+				"(Better than Notes)",
+				"Random taglines are still awesome.",
+				"Not as sticky as you'd think.",
+				"Pastel colours. Mmm.",
+				"Now with 100% more sliding!",
+				"Exactly what is says on the tin.",
+				"Skeumorphism is so 2009."
 			]},
 			{kind: "Scroller",
 			horizontal: "hidden",
@@ -46,11 +53,9 @@ enyo.kind({
 						style: "background-color: #F7EDB9; float: right;"},
 					],
 					pressed: function() {
-						enyo.log("Press");
 						this.addClass("onyx-selected");
 					},
 					released: function() {
-						enyo.log("Release");
 						this.removeClass("onyx-selected");
 					}}
 				]}
@@ -77,10 +82,14 @@ enyo.kind({
 	},
 	reflow: function(inSender) {
 		this.inherited(arguments);
-		if(enyo.Panels.isScreenNarrow())
+		if(enyo.Panels.isScreenNarrow()) {
 			this.setArrangerKind("PushPopArranger");
-		else
+			this.$.ContentPanels.addStyles("box-shadow: 0");
+		}
+		else {
 			this.setArrangerKind("CollapsingArranger");
+			this.$.ContentPanels.addStyles("box-shadow: -4px 0px 4px rgba(0,0,0,0.3)");
+		}
 	},
 	saveMemos: function() {
 		storageObject = {};
@@ -151,8 +160,8 @@ enyo.kind({
 	},
 	setupMenuItem: function(inSender, inEvent) {
 		var c = this.$.ContentPanels.getPanels();
-		var s = this.$.SearchInput;
-		if(c[inEvent.index + 1] && s.getValue() == '') {
+		enyo.log(this.$.MenuHeader.searchActive());
+		if(c[inEvent.index + 1] && !this.$.MenuHeader.searchActive()) {
 			inEvent.item.controls[0].controls[0].setContent(c[inEvent.index + 1].$.TitleInput.getValue());
 			inEvent.item.controls[0].controls[1].addStyles("background-color: " + c[inEvent.index + 1].$.ContentScroller.hasNode().style.backgroundColor + "!important;");
 		}
@@ -215,7 +224,7 @@ enyo.kind({
 		this.saveMemos();
 	},
 	menuItemTapped: function(inSender, inEvent) {
-		if(this.$.SearchInput.getValue() == '')
+		if(!this.$.MenuHeader.searchActive())
 			this.$.ContentPanels.setIndex(inEvent.index + 1);
 		else {
 			var c = this.$.ContentPanels.getPanels();
@@ -242,14 +251,13 @@ enyo.kind({
 		var m = 0;
 		for(var item in p) {
 			if(p[item].kind == "ContentPanel") {
-				if(p[item].$.TitleInput.getValue().match(inSender.getValue())) {
+				if(p[item].$.TitleInput.getValue().match(inEvent.value)) {
 					searchResults[m] = {title: p[item].$.TitleInput.getValue(), colour: p[item].$.ContentScroller.hasNode().style.backgroundColor };
 					m++;
 				}
 			}
 		}
 		r.setCount(m);
-		enyo.log(searchResults);
 	},
 	handleKeyUp: function(inSender, inEvent) {
 		//Handle back gesture
