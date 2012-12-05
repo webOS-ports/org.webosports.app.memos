@@ -3,7 +3,7 @@ enyo.depends(
 	"$lib/onyx",	// To theme Onyx using Theme.less, change this line to $lib/onyx/source,
 	//"Theme.less",	// uncomment this line, and follow the steps described in Theme.less
 	"$lib/ports",
+	"$lib/more-arrangers/source/PushPopArranger.js",
 	"App.css",
-	"App.js",
-	"PushPopArranger.js"
+	"App.js"
 );
