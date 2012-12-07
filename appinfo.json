@@ -1,11 +1,11 @@
 {
-	"title": "Memos",
+	"title": "OWO Memos",
 	"id": "org.webosports.app.memos",
-	"version": "0.8.0",
+	"version": "1.0.5",
 	"vendor": "WebOS Ports",
-	"vendor_url": "https://github.com/webOS-ports/org.webosports.app.memos",
+	"vendor_url": "http://www.webos-ports.org/wiki/Application:Ports",
 	"type": "web",
 	"main": "index.html",
 	"icon": "icon.png",
-	"uiRevision": "2"
+	"uiRevision": "2",
 }
