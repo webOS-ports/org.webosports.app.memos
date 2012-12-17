@@ -1,3 +1,99 @@
+enyo.kind({
+	name: "ColourPicker",
+	kind: "onyx.RadioGroup",
+	classes: "colour-picker",
+	events: {
+		onChanged: ""
+	},
+	components:[
+		{kind: "onyx.Button", classes: "colour-button", style: "background-color: lightblue", ontap: "clicked"},
+		{kind: "onyx.Button", classes: "colour-button", style: "background-color: #F7EDB9", active: true, ontap: "clicked"},
+		{kind: "onyx.Button", classes: "colour-button", style: "background-color: lightgreen", ontap: "clicked"},
+		{kind: "onyx.Button", classes: "colour-button", style: "background-color: pink", ontap: "clicked"},
+		{kind: "onyx.Button", classes: "colour-button", style: "background-color: salmon", ontap: "clicked"},
+	],
+	clicked: function() {
+		this.doChanged({value: this.active.hasNode().style.backgroundColor});
+	},
+});
+
+enyo.kind({
+	name: "ContentPanel",
+	layoutKind: "FittableRowsLayout",
+	events: {
+		onTitleChanged: "",
+		onColourChanged: "",
+		onMemoChanged: "",
+		onDeleteTapped: ""
+	},
+	published: {
+		gc: false,
+		searchMatch: false
+	},
+	components:[
+		{name: "Topbar", kind: "onyx.Toolbar", components:[
+			{kind: "onyx.InputDecorator", components:[
+				{name: "TitleInput",
+				kind: "onyx.Input",
+				defaultFocus: true,
+				placeholder: "Title...",
+				oninput: "inputChanged"}
+			]},
+			{kind: "onyx.IconButton", src: "assets/icon-trash.png", style: "float: right", ontap: "doDeleteTapped"},
+			//{kind: "onyx.IconButton", src: "assets/icon-email.png", style: "float: right"}
+		]},
+		{name: "ContentScroller",
+		kind: "Scroller",
+		horizontal: "hidden",
+		style: "background-color: #F7EDB9",
+		fit: true,
+		touch: true,
+		components:[
+			{name: "MemoText",
+			kind: "RichText",
+			content: "",
+			style: "position: absolute; top: 0; bottom: 0; left: 0; right: 0; padding: 20px 32px;",
+			handlers: {
+				ondragstart: "",
+				oninput: "memoChanged"
+			}},
+		]},
+		{kind: "onyx.Toolbar", components:[
+			{name: "Grabber", kind: "onyx.Grabber"},
+			{kind: "ColourPicker",
+			style: "position: absolute; left: 50%; margin-left: -92px;",
+			onChanged: "colorChanged"},
+		]}
+	],
+	reflow: function(inSender) {
+		this.inherited(arguments);
+		if(enyo.Panels.isScreenNarrow()) {
+			this.$.Grabber.applyStyle("visibility", "hidden");
+		}
+		else {
+			this.$.Grabber.applyStyle("visibility", "shown");
+		}
+	},
+	inputChanged: function(inSender) {
+		this.doTitleChanged({index: this.container.index, value: this.$.TitleInput.getValue()});
+	},
+	colorChanged: function(inSender, inEvent) {
+		this.$.ContentScroller.addStyles("background-color: " + inEvent.value + ";");
+		this.doColourChanged({index: this.container.index, value: inEvent.value});
+	},
+	memoChanged: function(inSender) {
+		this.doMemoChanged({index: this.container.index, value: this.$.MemoText.getValue()});
+	}
+});
+
+enyo.kind({
+	name: "EmptyPanel", layoutKind: "FittableRowsLayout", components:[
+		{kind: "onyx.Toolbar"},
+		{fit: true},
+		{kind: "onyx.Toolbar"}
+	]
+});
+
 var storageObject = {};
 var searchResults = {};
 
@@ -9,7 +105,7 @@ enyo.kind({
 	arrangerKind: "CollapsingArranger",
 	draggable: false,
 	components:[
-		{kind: "Signals", onkeydown: "handleKeyDown", onkeyup: "handleKeyUp"},
+		{kind: "Signals", onkeyup: "handleKeyUp"},
 		{name: "MenuPanel",
 		layoutKind: "FittableRowsLayout",
 		style: "width: 33%",
@@ -84,10 +180,12 @@ enyo.kind({
 		this.inherited(arguments);
 		if(enyo.Panels.isScreenNarrow()) {
 			this.setArrangerKind("PushPopArranger");
+			this.setDraggable(false);
 			this.$.ContentPanels.addStyles("box-shadow: 0");
 		}
 		else {
 			this.setArrangerKind("CollapsingArranger");
+			this.setDraggable(true);
 			this.$.ContentPanels.addStyles("box-shadow: -4px 0px 4px rgba(0,0,0,0.3)");
 		}
 	},
@@ -264,91 +362,4 @@ enyo.kind({
 		if(inEvent.keyIdentifier == "U+1200001")
 			return this.setIndex(0);
 	}
-});
-
-enyo.kind({
-	name: "EmptyPanel", layoutKind: "FittableRowsLayout", components:[
-		{kind: "onyx.Toolbar"},
-		{fit: true},
-		{kind: "onyx.Toolbar"}
-	]
-});
-
-enyo.kind({
-	name: "ContentPanel",
-	layoutKind: "FittableRowsLayout",
-	events: {
-		onTitleChanged: "",
-		onColourChanged: "",
-		onMemoChanged: "",
-		onDeleteTapped: ""
-	},
-	published: {
-		gc: false,
-		searchMatch: false
-	},
-	components:[
-		{name: "Topbar", kind: "onyx.Toolbar", components:[
-			{kind: "onyx.InputDecorator", components:[
-				{name: "TitleInput",
-				kind: "onyx.Input",
-				defaultFocus: true,
-				placeholder: "Title...",
-				oninput: "inputChanged"}
-			]},
-			{kind: "onyx.IconButton", src: "assets/icon-trash.png", style: "float: right", ontap: "doDeleteTapped"},
-			//{kind: "onyx.IconButton", src: "assets/icon-email.png", style: "float: right"}
-		]},
-		{name: "ContentScroller",
-		kind: "Scroller",
-		horizontal: "hidden",
-		style: "background-color: #F7EDB9",
-		fit: true,
-		touch: true,
-		components:[
-			{name: "MemoText",
-			kind: "RichText",
-			content: "",
-			style: "position: absolute; top: 0; bottom: 0; left: 0; right: 0; padding: 20px 32px;",
-			handlers: {
-				ondragstart: "",
-				oninput: "memoChanged"
-			}},
-		]},
-		{kind: "onyx.Toolbar", components:[
-			{kind: "onyx.Grabber"},
-			{kind: "ColourPicker",
-			style: "position: absolute; left: 50%; margin-left: -92px;",
-			onChanged: "colorChanged"},
-		]}
-	],
-	inputChanged: function(inSender) {
-		this.doTitleChanged({index: this.container.index, value: this.$.TitleInput.getValue()});
-	},
-	colorChanged: function(inSender, inEvent) {
-		this.$.ContentScroller.addStyles("background-color: " + inEvent.value + ";");
-		this.doColourChanged({index: this.container.index, value: inEvent.value});
-	},
-	memoChanged: function(inSender) {
-		this.doMemoChanged({index: this.container.index, value: this.$.MemoText.getValue()});
-	}
-});
-
-enyo.kind({
-	name: "ColourPicker",
-	kind: "onyx.RadioGroup",
-	classes: "colour-picker",
-	events: {
-		onChanged: ""
-	},
-	components:[
-		{kind: "onyx.Button", classes: "colour-button", style: "background-color: lightblue", ontap: "clicked"},
-		{kind: "onyx.Button", classes: "colour-button", style: "background-color: #F7EDB9", active: true, ontap: "clicked"},
-		{kind: "onyx.Button", classes: "colour-button", style: "background-color: lightgreen", ontap: "clicked"},
-		{kind: "onyx.Button", classes: "colour-button", style: "background-color: pink", ontap: "clicked"},
-		{kind: "onyx.Button", classes: "colour-button", style: "background-color: salmon", ontap: "clicked"},
-	],
-	clicked: function() {
-		this.doChanged({value: this.active.hasNode().style.backgroundColor});
-	},
 });
