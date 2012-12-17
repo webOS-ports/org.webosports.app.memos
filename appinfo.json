@@ -1,7 +1,7 @@
 {
 	"title": "Memos",
 	"id": "org.webosports.app.memos",
-	"version": "0.8.0",
+	"version": "1.0.6",
 	"vendor": "WebOS Ports",
 	"vendor_url": "https://github.com/webOS-ports/org.webosports.app.memos",
 	"type": "web",
