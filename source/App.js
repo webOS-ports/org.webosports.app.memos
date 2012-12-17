@@ -359,7 +359,7 @@ enyo.kind({
 	},
 	handleKeyUp: function(inSender, inEvent) {
 		//Handle back gesture
-		if(inEvent.keyIdentifier == "U+1200001")
+		if(inEvent.keyIdentifier == "U+1200001" || inEvent.keyIdentifier == "U+001B")
 			return this.setIndex(0);
 	}
 });
