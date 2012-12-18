@@ -105,7 +105,7 @@ enyo.kind({
 	arrangerKind: "CollapsingArranger",
 	draggable: false,
 	components:[
-		{kind: "Signals", onkeyup: "handleKeyUp"},
+		{kind: "BackGesture", onBack: "handleBackGesture"},
 		{name: "MenuPanel",
 		layoutKind: "FittableRowsLayout",
 		style: "width: 33%",
@@ -188,6 +188,9 @@ enyo.kind({
 			this.setDraggable(true);
 			this.$.ContentPanels.addStyles("box-shadow: -4px 0px 4px rgba(0,0,0,0.3)");
 		}
+	},
+	handleBackGesture: function(inSender, inEvent) {
+		return this.setIndex(0);
 	},
 	saveMemos: function() {
 		storageObject = {};
@@ -356,10 +359,5 @@ enyo.kind({
 			}
 		}
 		r.setCount(m);
-	},
-	handleKeyUp: function(inSender, inEvent) {
-		//Handle back gesture
-		if(inEvent.keyIdentifier == "U+1200001" || inEvent.keyIdentifier == "U+001B")
-			return this.setIndex(0);
 	}
 });
