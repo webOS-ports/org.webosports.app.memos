@@ -136,6 +136,7 @@ enyo.kind({
 				onSetupItem: "setupMenuItem",
 				components:[
 					{classes: "list-item",
+					index: 0,
 					ontap: "menuItemTapped",
 					handlers: {
 						onmousedown: "pressed",
@@ -232,7 +233,7 @@ enyo.kind({
 		}
 		else {
 			this.draggable = true;
-			this.$.ContentPanels.setIndex(2);
+			this.$.ContentPanels.setIndex(1);
 		}
 	},
 	createPanel: function(inSender) {
@@ -248,7 +249,6 @@ enyo.kind({
 	},
 	setupMenuItem: function(inSender, inEvent) {
 		var c = this.$.ContentPanels.getPanels();
-		enyo.log(this.$.MenuHeader.searchActive());
 		if(c[inEvent.index + 1] && !this.$.MenuHeader.searchActive()) {
 			inEvent.item.controls[0].controls[0].setContent(c[inEvent.index + 1].$.TitleInput.getValue());
 			inEvent.item.controls[0].controls[1].addStyles("background-color: " + c[inEvent.index + 1].$.ContentScroller.hasNode().style.backgroundColor + "!important;");
@@ -257,6 +257,7 @@ enyo.kind({
 			inEvent.item.controls[0].controls[0].setContent(searchResults[inEvent.index].title);
 			inEvent.item.controls[0].controls[1].addStyles("background-color: " + searchResults[inEvent.index].colour + "!important;");
 		}
+		
 		return true;
 	},
 	newMemo: function(inSender, inEvent) {
@@ -312,18 +313,17 @@ enyo.kind({
 		this.saveMemos();
 	},
 	menuItemTapped: function(inSender, inEvent) {
-		if(!this.$.MenuHeader.searchActive())
+		if(!this.$.MenuHeader.searchActive()) {
 			this.$.ContentPanels.setIndex(inEvent.index + 1);
+		}
 		else {
 			var c = this.$.ContentPanels.getPanels();
-			var idx = 0;
 			
 			for(var panel in c) {
 				if(c[panel].kind == "ContentPanel" && searchResults[inEvent.index].title == c[panel].$.TitleInput.getValue()) {
-					this.$.ContentPanels.setIndex(idx);
+					this.$.ContentPanels.setIndex(panel);
 					break;
 				}
-				idx++;
 			}
 			
 		}
@@ -368,7 +368,7 @@ enyo.kind({
 		if(enyo.Panels.isScreenNarrow()) {
 			this.$.AppPanels.setArrangerKind("CoreNaviArranger");
 			this.$.AppPanels.setDraggable(false);
-			this.$.AppPanels.$ContentPanels.addStyles("box-shadow: 0");
+			this.$.AppPanels.$.ContentPanels.addStyles("box-shadow: 0");
 		}
 		else {
 			this.$.AppPanels.setArrangerKind("CollapsingArranger");
