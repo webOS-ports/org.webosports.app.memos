@@ -103,7 +103,6 @@ enyo.kind({
 	fit: true,
 	realtimeFit: true,
 	arrangerKind: "CollapsingArranger",
-	draggable: false,
 	classes: "app-panels",
 	components:[
 		{name: "MenuPanel",
