@@ -1,10 +1,13 @@
 /**
-_enyo.TouchScrollStrategy_, a helper kind for implementing a touch-based
-scroller, integrates the scrolling simulation provided by
-<a href="#enyo.ScrollMath">enyo.ScrollMath</a> into an
-<a href="#enyo.Scroller">enyo.Scroller</a>.
+	_enyo.TouchScrollStrategy_ is a helper kind for implementing a touch-based
+	scroller. It integrates the scrolling simulation provided by
+	<a href="#enyo.ScrollMath">enyo.ScrollMath</a> into an
+	<a href="#enyo.Scroller">enyo.Scroller</a>.
 
-_enyo.TouchScrollStrategy_ is not typically created in application code.
+	_enyo.TouchScrollStrategy_ is not typically created in application code.
+	Instead, it is specified as the value of the `strategyKind` property of an
+	`enyo.Scroller` or <a href="#enyo.List">enyo.List</a>, or is used by the
+	framework implicitly.
 */
 enyo.kind({
 	name: "enyo.TouchScrollStrategy",
@@ -73,6 +76,8 @@ enyo.kind({
 	components: [
 		{name: "client", classes: "enyo-touch-scroller"}
 	],
+	// flag telling us whether the list is currently reordering
+	listReordering: false,
 	create: function() {
 		this.inherited(arguments);
 		this.transform = enyo.dom.canTransform();
@@ -179,7 +184,7 @@ enyo.kind({
 	//* Scrolls to specific x/y positions within the scroll area.
 	scrollTo: function(inX, inY) {
 		this.stop();
-		this.$.scrollMath.scrollTo(inY || inY === 0 ? inY : null, inX);
+		this.$.scrollMath.scrollTo(inX, inY || inY === 0 ? inY : null);
 	},
 	scrollIntoView: function() {
 		this.stop();
@@ -275,6 +280,10 @@ enyo.kind({
 		}
 	},
 	drag: function(inSender, inEvent) {
+		// if the list is doing a reorder, don't scroll
+		if(this.listReordering) {
+			return false;
+		}
 		if (this.dragging) {
 			inEvent.preventDefault();
 			this.$.scrollMath.drag(inEvent);
@@ -297,6 +306,7 @@ enyo.kind({
 		if (!this.dragging) {
 			this.calcBoundaries();
 			this.syncScrollMath();
+			this.stabilize();
 			if (this.$.scrollMath.mousewheel(e)) {
 				e.preventDefault();
 				return true;
@@ -401,8 +411,10 @@ enyo.kind({
 	//* Syncs and shows both the vertical and horizontal scroll indicators.
 	showThumbs: function() {
 		this.syncThumbs();
-		this.$.vthumb.show();
-		this.$.hthumb.show();
+		if (this.horizontal != "hidden")
+			this.$.hthumb.show();
+		if (this.vertical != "hidden")
+			this.$.vthumb.show();
 	},
 	//* Hides the vertical and horizontal scroll indicators.
 	hideThumbs: function() {

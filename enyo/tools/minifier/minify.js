@@ -58,6 +58,10 @@ concatCss = function(loader, doneCB) {
 			if (/^data:/.test(urlPath)) {
 				return "url(" + urlPath + ")";
 			}
+			// skip an external link
+			if (/^http(:?s)?:/.test(urlPath)) {
+			    return "url(" + urlPath + ")";
+			}
 			// get absolute path to referenced asset
 			var normalizedUrlPath = path.join(sheet, "..", urlPath);
 			// Make relative asset path to built css
@@ -76,7 +80,7 @@ concatCss = function(loader, doneCB) {
 		if (sheet) {
 			w(sheet);
 			var isLess = (sheet.slice(-4) == "less");
-			if (isLess && (opt.less !== undefined)) {
+			if (isLess && (opt.less !== true)) {
 				sheet = sheet.slice(0, sheet.length-4) + "css";
 				isLess = false;
 				w(" (Substituting CSS: " + sheet + ")");
