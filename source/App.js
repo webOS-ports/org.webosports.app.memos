@@ -123,38 +123,35 @@ enyo.kind({
 				"Exactly what is says on the tin.",
 				"Skeumorphism is so 2009."
 			]},
-			{kind: "Scroller",
-			horizontal: "hidden",
-			classes: "enyo-fill",
+			{name: "MenuRepeater",
+			kind: "List",
 			fit: true,
-			touch: true,
+			count: 0,
+			onSetupItem: "setupMenuItem",
 			components:[
-				{name: "MenuRepeater",
-				kind: "Repeater",
-				count: 0,
-				onSetupItem: "setupMenuItem",
+				{classes: "list-item",
+				index: 0,
+				ontap: "menuItemTapped",
+/*
+				handlers: {
+					onmousedown: "pressed",
+					ondragstart: "released",
+					onmouseup: "released"
+				},
+*/
 				components:[
-					{classes: "list-item",
-					index: 0,
-					ontap: "menuItemTapped",
-					handlers: {
-						onmousedown: "pressed",
-						ondragstart: "released",
-						onmouseup: "released"
-					},
-					components:[
-						{name: "ItemTitle", style: "position: absolute; margin-top: 6px;"},
-						{kind: "onyx.Button",
-						classes: "colour-button",
-						style: "background-color: #F7EDB9; float: right;"},
-					],
-					pressed: function() {
-						this.addClass("onyx-selected");
-					},
-					released: function() {
-						this.removeClass("onyx-selected");
-					}}
-				]}
+					{name: "ItemTitle", style: "position: absolute; margin-top: 6px;"},
+					{name: "ItemColour",
+					kind: "onyx.Button",
+					classes: "colour-button",
+					style: "background-color: #F7EDB9; float: right;"},
+				],
+				pressed: function() {
+					this.addClass("onyx-selected");
+				},
+				released: function() {
+					this.removeClass("onyx-selected");
+				}}
 			]},
 			{kind: "onyx.Toolbar", components:[
 				{kind: "onyx.IconButton",
@@ -224,6 +221,7 @@ enyo.kind({
 			
 			this.$.ContentPanels.reflow();
 			this.$.MenuRepeater.setCount(idx);
+			this.$.MenuRepeater.refresh();
 		}
 		
 		if(this.$.MenuRepeater.count == 0) {
@@ -248,13 +246,14 @@ enyo.kind({
 	},
 	setupMenuItem: function(inSender, inEvent) {
 		var c = this.$.ContentPanels.getPanels();
+		enyo.log(inEvent);
 		if(c[inEvent.index + 1] && !this.$.MenuHeader.searchActive()) {
-			inEvent.item.controls[0].controls[0].setContent(c[inEvent.index + 1].$.TitleInput.getValue());
-			inEvent.item.controls[0].controls[1].addStyles("background-color: " + c[inEvent.index + 1].$.ContentScroller.hasNode().style.backgroundColor + "!important;");
+			this.$.ItemTitle.setContent(c[inEvent.index + 1].$.TitleInput.getValue());
+			this.$.ItemColour.addStyles("background-color: " + c[inEvent.index + 1].$.ContentScroller.hasNode().style.backgroundColor + "!important;");
 		}
 		else if(searchResults[inEvent.index]) {
-			inEvent.item.controls[0].controls[0].setContent(searchResults[inEvent.index].title);
-			inEvent.item.controls[0].controls[1].addStyles("background-color: " + searchResults[inEvent.index].colour + "!important;");
+			this.$.ItemTitle.setContent(searchResults[inEvent.index].title);
+			this.$.ItemTitle.addStyles("background-color: " + searchResults[inEvent.index].colour + "!important;");
 		}
 		
 		return true;
@@ -276,6 +275,7 @@ enyo.kind({
 		
 		storageObject[count++] = {title: "", colour: "", text: ""};
 		this.$.MenuRepeater.setCount(count);
+		this.$.MenuRepeater.refresh();
 		this.saveMemos();
 		
 		this.draggable = true;
@@ -291,6 +291,7 @@ enyo.kind({
 			p.destroy();
 			
 			this.$.MenuRepeater.setCount(this.$.ContentPanels.getPanels().length - 1);
+			this.$.MenuRepeater.refresh();
 		
 			this.saveMemos();
 		
@@ -301,11 +302,11 @@ enyo.kind({
 		}
 	},
 	panelTitleChanged: function(inSender, inEvent) {
-		this.$.MenuRepeater.renderRow(inEvent.index - 1);
+		this.$.MenuRepeater.refresh();
 		this.saveMemos();
 	},
 	panelColourChanged: function(inSender, inEvent) {
-		this.$.MenuRepeater.renderRow(inEvent.index - 1);
+		this.$.MenuRepeater.refresh();
 		this.saveMemos();
 	},
 	memoChanged: function(inSender, inEvent) {
@@ -345,6 +346,7 @@ enyo.kind({
 			}
 		}
 		r.setCount(m);
+		r.refresh();
 	}
 });
 
