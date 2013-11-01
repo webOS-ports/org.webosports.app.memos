@@ -339,7 +339,7 @@ enyo.kind({
 		var m = 0;
 		for(var item in p) {
 			if(p[item].kind == "ContentPanel") {
-				if(p[item].$.TitleInput.getValue().match(inEvent.value)) {
+				if(p[item].$.TitleInput.getValue().match(inEvent.value) || p[item].$.MemoText.getValue().match(inEvent.value)) {
 					searchResults[m] = {title: p[item].$.TitleInput.getValue(), colour: p[item].$.ContentScroller.hasNode().style.backgroundColor };
 					m++;
 				}
