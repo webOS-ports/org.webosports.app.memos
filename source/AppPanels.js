@@ -94,7 +94,6 @@ enyo.kind({
 				storageObject.push(row);
 			}
 		}
-		this.$.ContentPanels.reflow();
 		localStorage.webOSMemos = JSON.stringify(storageObject);
 	},
 
