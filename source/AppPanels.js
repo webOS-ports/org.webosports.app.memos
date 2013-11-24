@@ -153,7 +153,7 @@ enyo.kind({
 	},
 	
 	setupMenuItem: function(inSender, inEvent) {
-
+		
 		// index +1 to pass the EmptyPanel
 		if(storageObject[inEvent.index] && !this.$.MenuHeader.searchActive()) {
 			this.$.ItemTitle.setContent(storageObject[inEvent.index].title);
@@ -168,6 +168,9 @@ enyo.kind({
 	},
 
 	newMemo: function(inSender, inEvent) {
+
+		this.clearSearch();
+
 		var count = 0;
 		for(idx in storageObject){
 			count++;
@@ -190,9 +193,11 @@ enyo.kind({
 		this.saveMemos();
 		
 		this.draggable = true;
+
 	},
 
 	deleteMemo: function(inSender) {
+		this.clearSearch();
 		// index-1 to exclude the empty Panel
 		storageObject.splice(this.$.ContentPanels.index-1,1);
 		this.$.ContentPanels.setIndex(0);
@@ -202,13 +207,13 @@ enyo.kind({
 	},
 
 	panelTitleChanged: function(inSender, inEvent) {
-		this.$.MenuRepeater.refresh();
 		this.saveMemos();
+		this.$.MenuRepeater.refresh();
 	},
 
 	panelColourChanged: function(inSender, inEvent) {
-		this.$.MenuRepeater.refresh();
 		this.saveMemos();
+		this.$.MenuRepeater.refresh();
 	},
 
 	memoChanged: function(inSender, inEvent) {
@@ -244,9 +249,11 @@ enyo.kind({
 		
 		var r = this.$.MenuRepeater;
 		var m = 0;
+		// TODO: setting to change case sensitive search on/off
+		var searchTerm = new RegExp(inEvent.value, "i");
 		
 		for(var item in storageObject) {
-			if(storageObject[item].title.match(inEvent.value) || storageObject[item].text.match(inEvent.value)) {
+			if(storageObject[item].title.match(searchTerm) || storageObject[item].text.match(searchTerm)) {
 				searchResults[m] = {title: storageObject[item].title, colour: storageObject[item].colour};
 				m++;
 			}
@@ -254,5 +261,14 @@ enyo.kind({
 
 		r.setCount(m);
 		r.refresh();
+	},
+
+
+	clearSearch: function(){
+		searchResults = {};
+
+		// TODO - expose a clearSearch method on PortsSearch Kind
+		this.$.MenuHeader.$.SearchInput.setValue("");
+
 	}
 });
