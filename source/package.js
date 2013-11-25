@@ -4,5 +4,9 @@ enyo.depends(
 	//"Theme.less",	// uncomment this line, and follow the steps described in Theme.less
 	"$lib/webos-lib",
 	"App.css",
-	"App.js"
+	"App.js",
+	"ColourPicker.js",
+	"EmptyPanel.js",
+	"ContentPanel.js",
+	"AppPanels.js"
 );
