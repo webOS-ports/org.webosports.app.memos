@@ -207,8 +207,11 @@ enyo.kind({
 	},
 
 	panelTitleChanged: function(inSender, inEvent) {
-		this.saveMemos();
-		this.$.MenuRepeater.refresh();
+		enyo.job(null, enyo.bind( this, function(){
+			this.saveMemos();
+			this.$.MenuRepeater.refresh();
+			}), 200);
+		
 	},
 
 	panelColourChanged: function(inSender, inEvent) {
@@ -217,7 +220,7 @@ enyo.kind({
 	},
 
 	memoChanged: function(inSender, inEvent) {
-		this.saveMemos();
+		enyo.job(null, enyo.bind( this, "saveMemos" ),200);
 	},
 
 	menuItemTapped: function(inSender, inEvent) {
