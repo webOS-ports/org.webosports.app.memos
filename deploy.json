@@ -1,0 +1,6 @@
+{
+	"enyo": "./enyo",
+	"packagejs": "./package.js",
+	"assets": ["./index.html", "./assets", "./appinfo.json", "framework_config.json"],
+	"libs": ["./lib/onyx", "./lib/layout"]
+}
