@@ -185,6 +185,8 @@ enyo.kind({
 		
 		if(enyo.Panels.isScreenNarrow()){
 			this.setIndex(1);
+			// re-redner to get the focus back
+			p.render();
 		}
 		
 		storageObject[count++] = {title: "", colour: "", text: ""};
