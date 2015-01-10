@@ -109,14 +109,15 @@ enyo.kind({
 			
 			var idx = 0;
 			for(var key in storageObject) {
-				p = this.createPanel();
-				p.$.TitleInput.setValue(storageObject[key].title);
-				p.$.ContentScroller.addStyles("background-color: " + storageObject[key].colour + "!important;");
-				p.$.MemoText.setValue(storageObject[key].text);
-				p.render();
-				idx++;
+				if(!isNaN(key)){
+					p = this.createPanel();
+					p.$.TitleInput.setValue(storageObject[key].title);
+					p.$.ContentScroller.addStyles("background-color: " + storageObject[key].colour + "!important;");
+					p.$.MemoText.setValue(storageObject[key].text);
+					p.render();
+					idx++;
+				}
 			}
-			
 			this.$.ContentPanels.reflow();
 			this.$.MenuRepeater.setCount(idx);
 			this.$.MenuRepeater.refresh();
@@ -168,14 +169,13 @@ enyo.kind({
 	},
 
 	newMemo: function(inSender, inEvent) {
-
 		this.clearSearch();
-
 		var count = 0;
-		for(idx in storageObject){
+		for(var idx in storageObject){
+			if(!isNaN(idx)){
 			count++;
+			}
 		}
-			
 		p = this.createPanel();
 		p.render();
 		this.$.ContentPanels.reflow();
