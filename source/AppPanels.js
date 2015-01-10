@@ -268,7 +268,6 @@ enyo.kind({
 		r.refresh();
 	},
 
-
 	clearSearch: function(){
 		searchResults = {};
 

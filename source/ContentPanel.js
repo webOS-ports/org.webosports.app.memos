@@ -16,7 +16,7 @@ enyo.kind({
 			{kind: "onyx.InputDecorator", components:[
 				{name: "TitleInput",
 				kind: "onyx.Input",
-				defaultFocus: true,
+				hasFocus: true,
 				placeholder: "Title...",
 				oninput: "inputChanged"}
 			]},
