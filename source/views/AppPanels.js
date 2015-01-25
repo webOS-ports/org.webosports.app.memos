@@ -112,7 +112,7 @@ enyo.kind({
 				if(!isNaN(key)){
 					p = this.createPanel();
 					p.$.TitleInput.setValue(storageObject[key].title);
-					p.$.ContentScroller.addStyles("background-color: " + storageObject[key].colour + "!important;");
+					p.$.ContentScroller.addStyles("background-color: " + storageObject[key].colour);
 					p.$.MemoText.setValue(storageObject[key].text);
 					p.render();
 					idx++;
@@ -173,7 +173,7 @@ enyo.kind({
 		var count = 0;
 		for(var idx in storageObject){
 			if(!isNaN(idx)){
-			count++;
+				count++;
 			}
 		}
 		p = this.createPanel();
@@ -258,9 +258,12 @@ enyo.kind({
 		var searchTerm = new RegExp(inEvent.value, "i");
 		
 		for(var item in storageObject) {
-			if(storageObject[item].title.match(searchTerm) || storageObject[item].text.match(searchTerm)) {
-				searchResults[m] = {title: storageObject[item].title, colour: storageObject[item].colour};
-				m++;
+			if(!isNaN(item)){
+				
+				if(storageObject[item].title.match(searchTerm) || storageObject[item].text.match(searchTerm)) {
+					searchResults[m] = {title: storageObject[item].title, colour: storageObject[item].colour};
+					m++;
+				}
 			}
 		}
 
