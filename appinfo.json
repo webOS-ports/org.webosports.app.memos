@@ -8,5 +8,5 @@
 	"main": "index.html",
 	"icon": "icon.png",
 	"uiRevision": "2",
-	"requiredPermissions": ["database.internal"]
+	"requiredPermissions": ["database.operation"]
 }
