@@ -1,12 +1,28 @@
 {
 	"title": "Memos",
 	"id": "org.webosports.app.memos",
-	"version": "1.0.7",
+	"version": "1.0.8",
 	"vendor": "WebOS Ports",
 	"vendor_url": "https://github.com/webOS-ports/org.webosports.app.memos",
 	"type": "web",
 	"main": "index.html",
 	"icon": "icon.png",
 	"uiRevision": "2",
-	"requiredPermissions": ["database.operation"]
+	"universalSearch": {
+		"action": {
+			"displayName": "New Memo",
+			"url": "org.webosports.app.memos",
+			"launchParam": "text"
+		}
+	},
+	"keywords": [
+		"Memos",
+		"Notes",
+		"Stickies",
+		"Notepad"
+	],
+	"requiredPermissions": [
+		"application.launcher",
+		"database.operation"
+	]
 }
