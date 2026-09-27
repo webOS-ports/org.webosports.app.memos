@@ -1,6 +1,10 @@
 /*
 	Put anything you reference with "url()" in ../assets/
 	This way, you can minify your application, and just remove the "source" folder for production
+
+	Memo colours are not defined here: they come from Memo.cssColours and are
+	applied at runtime, so the swatches, the editor background and the list chips
+	all read from one table.
 */
 .app-panels {
 	background-color: #000000;
@@ -14,24 +18,101 @@
 	height: 54px;
 }
 
+.topbar-button {
+	float: right;
+}
+
+.title-decorator {
+	width: 60%;
+}
+
+/* --- Memo list --- */
+
+.menu-panel {
+	/* Width of the list side under the CollapsingArranger. The explicit height
+	   matters: FittableRows can only size the fitting List against a definite
+	   height, and without it enyo.List falls back to a 1,000,000px tall node. */
+	width: 33%;
+	height: 100%;
+	position: relative;
+}
+
 .list-item {
 	width: inherit;
-	height: 32px;
-	padding: 10px;
+	height: 52px;
+	padding: 8px 10px;
 	color: white;
 	background-color: #333333;
 	border-bottom: 1px solid #0E0E0E;
 	font-size: 18px;
+	overflow: hidden;
 }
 
-.list-item.onyx-selected {
+.list-item.onyx-selected,
+.list-item.selected {
 	background-color: MidnightBlue;
+}
+
+.list-item-colour {
+	float: right;
+	width: 24px;
+	height: 24px;
+	margin-left: 8px;
+	border-radius: 6px;
+}
+
+.list-item-text {
+	overflow: hidden;
+}
+
+.list-item-title {
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.list-item-preview {
+	margin-top: 2px;
+	font-size: 13px;
+	color: #AAAAAA;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.empty-message {
+	position: absolute;
+	top: 40%;
+	left: 0;
+	right: 0;
+	padding: 0 24px;
+	text-align: center;
+	color: #999999;
+	font-size: 16px;
+}
+
+/* --- Memo editor --- */
+
+.memo-body {
+	background-color: #F7EDB9;
+}
+
+.memo-text {
+	position: absolute;
+	top: 0;
+	bottom: 0;
+	left: 0;
+	right: 0;
+	padding: 20px 32px;
 }
 
 .colour-picker {
 	width: 190px;
 	height: 32px;
 	margin: 0;
+	position: absolute;
+	left: 50%;
+	margin-left: -95px;
 }
 
 .colour-button {
@@ -41,4 +122,52 @@
 	border: 0;
 	margin-right: 6px;
 	border-radius: 6px;
+}
+
+/*
+	Scoped to .colour-picker to outrank onyx's own ".onyx-button.active", which
+	is equally specific and, because its .less files are compiled and appended at
+	runtime, would otherwise land later in the cascade and win.
+*/
+.colour-picker .colour-button.active {
+	/* box-shadow rather than a border, so selecting a swatch does not resize it */
+	box-shadow: 0 0 0 3px #FFFFFF;
+	/* onyx paints an inverted gradient over active buttons; keep the swatch flat */
+	background-image: none;
+	border-top: 0;
+}
+
+.empty-panel-message {
+	padding-top: 40%;
+	text-align: center;
+	color: #999999;
+	font-size: 16px;
+}
+
+/* --- Delete confirmation --- */
+
+.confirm-delete {
+	width: 300px;
+	padding: 20px;
+	text-align: center;
+}
+
+.confirm-delete-title {
+	font-size: 18px;
+	margin-bottom: 8px;
+}
+
+.confirm-delete-text {
+	font-size: 14px;
+	color: #999999;
+	margin-bottom: 16px;
+}
+
+.confirm-delete-buttons {
+	text-align: center;
+}
+
+.confirm-delete-button {
+	width: 45%;
+	margin: 0 2%;
 }

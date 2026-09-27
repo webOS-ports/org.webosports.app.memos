@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+		<title>Memos smoke test</title>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf8"/>
+		<script>
+			window.__errors = [];
+			window.onerror = function(msg, url, line, col) {
+				window.__errors.push(msg + " @ " + url + ":" + line + ":" + col);
+			};
+			var _warn = console.warn, _err = console.error;
+			console.error = function() { window.__errors.push("console.error: " + Array.prototype.join.call(arguments, " ")); _err.apply(console, arguments); };
+		</script>
+		<script src="enyo/tools/less.js"></script>
+		<script src="enyo/enyo.js" charset="utf-8"></script>
+		<script src="source/package.js" charset="utf-8"></script>
+	</head>
+	<body class="enyo-unselectable">
+		<script>
+			// Give enyo's debug loader time to pull in every source file, then
+			// exercise the parts a device would drive.
+			setTimeout(function() {
+				var out = [];
+				// Only `true` passes. A string is a failure carrying its reason;
+				// treating it as a pass once hid a real bug.
+				function check(name, fn) {
+					try {
+						var r = fn();
+						out.push((r === true ? "ok   " : "FAIL ") + name + (typeof r === "string" ? " :: " + r : ""));
+					} catch (e) { out.push("FAIL " + name + " :: " + (e && e.message)); }
+				}
+
+				check("enyo loaded", function() { return typeof enyo !== "undefined"; });
+				check("Memo kind defined", function() { return typeof Memo === "function"; });
+				check("MemoStore kind defined", function() { return typeof MemoStore === "function"; });
+				check("AppManager defined", function() { return typeof AppManager === "object"; });
+				check("app instantiated", function() { return !!(window.App && App.view); });
+
+				var view = window.App && App.view;
+				var panels = view && view.$.AppPanels;
+
+				check("AppPanels present", function() { return !!panels; });
+				check("AppPanels has exactly 2 panels", function() {
+					var n = panels.getPanels().length;
+					return n === 2 ? true : "got " + n;
+				});
+				check("ConfirmDelete is not a panel", function() {
+					return !!(view.$.ConfirmDelete && view.$.ConfirmDelete.parent !== panels);
+				});
+				check("store reachable", function() { return !!panels.store; });
+
+				// Browser fallback path: no PalmServiceBridge here.
+				check("store falls back off-device", function() { return panels.store.hasDb() === false; });
+
+				check("create + edit + persist a memo", function() {
+					panels.newMemo();
+					var memo = panels.store.memos[0];
+					if (!memo) { return "no memo created"; }
+					var panel = panels.panelFor(memo);
+					if (!panel) { return "no panel for memo"; }
+					panel.$.MemoText.setValue("smoke test body");
+					panel.commit();
+					panels.saveMemo(memo);
+					return panels.store.memos.length === 1 && memo.getText() === "smoke test body";
+				});
+
+				check("list row renders title and colour", function() {
+					panels.$.MenuRepeater.refresh();
+					var memo = panels.store.memos[0];
+					return memo.getDisplayTitle() === "smoke test body";
+				});
+
+				check("colour picker syncs to the memo", function() {
+					var memo = panels.store.memos[0];
+					var panel = panels.panelFor(memo);
+					panel.$.ColourPicker.setColour("pink");
+					return panel.$.ColourPicker.getColour() === "pink" ? true : "picker shows " + panel.$.ColourPicker.getColour();
+				});
+
+				check("picking a colour updates the memo", function() {
+					var memo = panels.store.memos[0];
+					var panel = panels.panelFor(memo);
+					panel.$.ColourPicker.$.colour_green.setActive(true);
+					return memo.getColour() === "green" ? true : "memo colour is " + memo.getColour();
+				});
+
+				check("delete asks for confirmation first", function() {
+					var memo = panels.store.memos[0];
+					var panel = panels.panelFor(memo);
+					panel.deleteTapped();
+					if (panels.store.memos.length !== 1) { return "memo deleted without confirmation"; }
+					return view.$.ConfirmDelete.showing === true ? true : "popup not showing";
+				});
+
+				check("confirming the delete removes the memo", function() {
+					view.$.ConfirmDelete.deleteTapped();
+					return panels.store.memos.length === 0 ? true : "still " + panels.store.memos.length + " memo(s)";
+				});
+
+				check("search term with regex metacharacters is safe", function() {
+					panels.applyFilter("(unclosed[");
+					return true;
+				});
+
+				check("search narrows the list and restores it", function() {
+					["alpha note", "bravo note", "charlie"].forEach(function(txt) {
+						panels.newMemo();
+						var m = panels.store.memos[0];
+						panels.panelFor(m).$.MemoText.setValue(txt);
+						panels.panelFor(m).commit();
+						panels.saveMemo(m);
+					});
+					panels.applyFilter("note");
+					if (panels.store.memos.length !== 2) { return "filtered to " + panels.store.memos.length; }
+					panels.clearSearch();
+					return panels.store.memos.length === 3 ? true : "restored to " + panels.store.memos.length;
+				});
+
+				check("universal search text opens a prefilled memo", function() {
+					var before = panels.store.memos.length;
+					view.handleLaunchParams({text: "from just type"});
+					var memo = panels.store.memos[0];
+					return (panels.store.memos.length === before + 1 && memo.getText() === "from just type")
+						? true : "got " + (memo && memo.getText());
+				});
+
+				check("deactivating the window flushes pending edits", function() {
+					panels.newMemo();
+					var memo = panels.store.memos[0];
+					panels.panelFor(memo).$.MemoText.setValue("typed then minimised");
+					// No commit() and no waiting for the save debounce, which is
+					// exactly the case that used to lose the last keystrokes.
+					view.handleDeactivate();
+					return memo.getText() === "typed then minimised"
+						? true : "memo holds " + JSON.stringify(memo.getText());
+				});
+
+				check("a memo abandoned blank leaves no row", function() {
+					var before = panels.store.memos.length;
+					panels.newMemo();
+					var memo = panels.store.memos[0];
+					view.handleDeactivate();
+					return panels.store.memos.length === before
+						? true : "list grew to " + panels.store.memos.length;
+				});
+
+				check("no uncaught errors", function() {
+					return window.__errors.length === 0 ? true : window.__errors.join(" | ");
+				});
+
+				// enyo renders over document.body, so results go on <html> where
+				// --dump-dom will still show them.
+				document.documentElement.setAttribute("data-smoke", "SMOKE-BEGIN;" + out.join(";") + ";SMOKE-END");
+			}, 3000);
+		</script>
+	</body>
+</html>

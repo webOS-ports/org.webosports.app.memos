@@ -1,7 +1,8 @@
 enyo.depends(
 	"EmptyPanel.js",
-	"ContentPanel.js",
+	"ConfirmDelete.js",
 	"ColourPicker.js",
+	"ContentPanel.js",
 	"AppPanels.js",
 	"memos.js"
 );
