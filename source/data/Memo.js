@@ -258,6 +258,12 @@ Memo.sanitize = function(inText) {
 	}
 	return String(inText)
 		.replace(/<\/?(a)[^>]*>/ig, "")
+		// Chromium (Q25 and other WebEngine devices) wraps each line typed after
+		// Enter in a <div>, and an empty line is <div><br></div>. That <br> is a
+		// placeholder that only keeps the empty block visible; a <br> ending a
+		// block never renders an extra line. Counting it as well as the <div>
+		// turned every blank line into two on reopen.
+		.replace(/<br\s*\/?>(?=<\/div>)/ig, "")
 		.replace(/<div>/ig, "\n")
 		.replace(/<\/div>/ig, "")
 		.replace(/<br\s*\/?>/ig, "\n")

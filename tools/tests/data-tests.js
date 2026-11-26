@@ -129,6 +129,25 @@ t('display text round-trips back through sanitize unchanged', function () {
     'round trip changed the body: ' + JSON.stringify(m2.getText()));
 });
 
+t('blank line typed in Chromium contenteditable stays a single blank line', function () {
+  // Chromium wraps each new line in a <div>; an empty line is <div><br></div>,
+  // where the <br> is only a placeholder that keeps the empty block visible.
+  var m = new Memo();
+  m.setText('one<div><br></div><div>two</div>');
+  assert.strictEqual(m.getText(), 'one\n\ntwo');
+  m.setText('one<div>two</div><div><br></div><div><br></div><div>three</div>');
+  assert.strictEqual(m.getText(), 'one\ntwo\n\n\nthree');
+});
+
+t('blank line survives a save/reopen/save cycle without growing', function () {
+  var m = new Memo();
+  m.setText('one\n\ntwo');
+  // Reopened: display form is one<br/><br/>two. Chromium keeps those <br>s and
+  // the user appends a line with Enter, which becomes a <div>.
+  m.setText(m.getDisplayText() + '<div>three</div>');
+  assert.strictEqual(m.getText(), 'one\n\ntwo\nthree');
+});
+
 t('links added by the text indexer survive the round trip as plain text', function () {
   var m = new Memo();
   m.setText('see http://example.com today');
